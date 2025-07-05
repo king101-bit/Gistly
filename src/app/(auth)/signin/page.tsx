@@ -78,7 +78,7 @@ export default function AuthPage() {
             </Button>
           </Link>
           <div className="text-3xl font-black bg-gradient-to-r from-emerald-400 to-yellow-400 bg-clip-text text-transparent mb-4">
-            NaijaConnect
+            Gistly
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">
             {isSignUp ? 'Join the community!' : 'Welcome back!'}
