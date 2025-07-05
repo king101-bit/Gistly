@@ -204,7 +204,7 @@ export default function AuthPage() {
                   ? 'Creating Account...'
                   : 'Signing in...'
                 : isSignUp
-                  ? 'Join NaijaConnect 🇳🇬'
+                  ? 'Join gistly'
                   : 'Sign In 🇳🇬'}
             </Button>
 
