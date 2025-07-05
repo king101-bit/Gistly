@@ -47,18 +47,22 @@ export default function FollowingPage() {
         console.error('Error fetching following:', error)
       } else {
         setFollowing(
-          data.map((item) => ({
-            id: item.profiles.id,
-            username: item.profiles.username,
-            display_name: item.profiles.display_name,
-            avatar_url: item.profiles.avatar_url,
-            bio: item.profiles.bio,
-            location: item.profiles.location,
-            verified: item.profiles.verified ?? false,
-            profile_created_at: item.profiles.joined, // if your column is `joined`
-            followed_at: item.created_at, // from the relationships table
-            followsYou: false, // default for now or fetch separately
-          })),
+          data.map((item) => {
+            const profile = item.profiles as any // or as a stricter inline type
+
+            return {
+              id: profile.id,
+              username: profile.username,
+              display_name: profile.display_name,
+              avatar_url: profile.avatar_url,
+              bio: profile.bio,
+              location: profile.location,
+              verified: profile.verified ?? false,
+              profile_created_at: profile.joined,
+              followed_at: item.created_at,
+              followsYou: false,
+            }
+          }),
         )
       }
 

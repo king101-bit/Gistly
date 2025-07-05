@@ -294,7 +294,7 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               {currentTab === 'posts' && (
-                <div className="mb-4 gap-6">
+                <div className="mt-4 mb-4 gap-6">
                   {posts.length > 0 ? (
                     posts.map((post, index) => (
                       <div
