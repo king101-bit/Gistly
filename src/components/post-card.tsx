@@ -30,7 +30,8 @@ import { createClient } from '../../utils/supabase/client'
 import { deletePost, PostActionsDropdown } from './PostActionsDropdown'
 import { toast } from 'sonner'
 import { EditPostModal } from './edit-post-modal'
-import UserAvatar from './UserAvatar'
+import { getInitials } from '../../utils/getInitals'
+import { ShareMenu } from './ShareMenu'
 
 interface PostCardProps {
   post: Post
@@ -42,8 +43,10 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
   const { isAuthenticated } = useAuth()
   const user = useUser()
   const supabase = createClient()
+  const [commentCount, setCommentCount] = useState(0)
   const [isEditing, setIsEditing] = useState(false)
   const [localPost, setLocalPost] = useState(post)
+  const [timeAgo, setTimeAgo] = useState('')
   const emojiStyles: Record<string, string> = {
     '❤️': 'bg-red-500/20 text-red-500',
     '🔥': 'bg-amber-500/20 text-amber-500',
@@ -110,7 +113,6 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
         )
       }
     } else {
-      // Add reaction
       const { error } = await supabase.from('reactions').insert({
         user_id: user?.id,
         target_type: 'post',
@@ -132,14 +134,46 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
       }
     }
   }
+  useEffect(() => {
+    async function fetchCommentCount() {
+      const { count, error } = await supabase
+        .from('comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', post.id)
 
-  const normalizePostMediaToMediaItem = (media: PostMedia[]): MediaItem[] => {
+      if (!error && typeof count === 'number') {
+        setCommentCount(count)
+      } else {
+        console.error('Failed to fetch comment count:', error)
+      }
+    }
+    console.log('Raw media:', localPost.post_media)
+    fetchCommentCount()
+  }, [post.id])
+  useEffect(() => {
+    if (post.created_at) {
+      const createdAtDate = new Date(post.created_at)
+      if (!isNaN(createdAtDate.getTime())) {
+        setTimeAgo(formatDistanceToNow(createdAtDate, { addSuffix: true }))
+      } else {
+        setTimeAgo('Invalid date')
+      }
+    }
+  }, [post.created_at])
+
+  const normalizePostMediaToMediaItem = (media?: PostMedia[]): MediaItem[] => {
+    if (!Array.isArray(media)) return []
     return media.map(({ thumbnail, duration, ...rest }) => ({
       ...rest,
       thumbnail: thumbnail ?? undefined,
       duration: duration ?? undefined,
     }))
   }
+  const mediaItems = normalizePostMediaToMediaItem(localPost.post_media)
+  const normalizedMedia = normalizePostMediaToMediaItem(
+    localPost.post_media || [],
+  )
+  console.log('Normalized media:', normalizedMedia)
 
   const processContent = (content: string) =>
     content.replace(/#(\w+)/g, (match) => {
@@ -148,16 +182,8 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
       )}" class="hashtag-highlight hover:underline">${match}</a>`
     })
 
-  const createdAtDate = new Date(post.created_at)
-  const timeAgo =
-    post.created_at && !isNaN(createdAtDate.getTime())
-      ? formatDistanceToNow(createdAtDate, { addSuffix: true })
-      : 'Invalid date'
-
   const handleEditPost = async (updatedPost: Post) => {
     try {
-      // Start a transaction-like approach
-      // First, update the post content and location
       const { error: postError } = await supabase
         .from('posts')
         .update({
@@ -173,18 +199,15 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
         return
       }
 
-      // Handle media updates if there are changes
-      if (updatedPost.media) {
-        // Get current media for comparison
+      if (updatedPost.post_media) {
         const { data: currentMedia } = await supabase
           .from('post_media')
           .select('*')
           .eq('post_id', updatedPost.id)
 
         const currentMediaIds = currentMedia?.map((m) => m.id) || []
-        const updatedMediaIds = updatedPost.media.map((m) => m.id)
+        const updatedMediaIds = updatedPost.post_media.map((m) => m.id)
 
-        // Delete removed media items
         const mediaToDelete = currentMediaIds.filter(
           (id) => !updatedMediaIds.includes(id),
         )
@@ -196,12 +219,10 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
 
           if (deleteError) {
             console.error('Failed to delete media:', deleteError)
-            // Continue anyway, don't fail the whole operation
           }
         }
 
-        // Update existing media items (in case metadata changed)
-        for (const mediaItem of updatedPost.media) {
+        for (const mediaItem of updatedPost.post_media) {
           if (currentMediaIds.includes(mediaItem.id)) {
             const { error: updateError } = await supabase
               .from('post_media')
@@ -215,13 +236,11 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
 
             if (updateError) {
               console.error('Failed to update media item:', updateError)
-              // Continue anyway
             }
           }
         }
       }
 
-      // Update local state
       setLocalPost(updatedPost)
       console.log('PostCard received post:', post)
       setIsEditing(false)
@@ -245,7 +264,10 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
             key={emoji}
             variant="ghost"
             size="sm"
-            onClick={() => handleReact(emoji)}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleReact(emoji)
+            }}
             className={`hover:scale-110 transition-transform p-2 rounded-full font-semibold ${activeStyle}`}
           >
             <span className="text-xl">{emoji}</span>
@@ -276,7 +298,16 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
         onClick={() => !detailed && router.push(`/post/${post.id}`)}
       >
         <div className="flex gap-4">
-          <UserAvatar className={`${detailed ? 'size-16' : 'size-14'}`} />
+          <Avatar className={`${detailed ? 'size-16' : 'size-14'}`}>
+            <AvatarImage
+              src={localPost.profiles.avatar_url}
+              alt={localPost.profiles.display_name}
+            />
+            <AvatarFallback>
+              {getInitials(localPost?.profiles?.display_name || 'U')}
+            </AvatarFallback>
+          </Avatar>
+
           <div className="flex-1 min-w-0">
             <div className="flex justify-between">
               <div className="text-sm text-muted-foreground flex gap-2 flex-wrap">
@@ -311,15 +342,17 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
               }}
             />
 
-            {localPost.media && localPost.media.length > 0 && (
-              <div className="mt-3">
-                {localPost.media[0].type === 'video' ? (
+            {localPost.post_media && localPost.post_media.length > 0 && (
+              <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                {localPost.post_media[0].type === 'video' ? (
                   <VideoPlayer
-                    media={normalizePostMediaToMediaItem(localPost.media)[0]}
+                    media={
+                      normalizePostMediaToMediaItem(localPost.post_media)[0]
+                    }
                   />
                 ) : (
                   <MediaGrid
-                    media={normalizePostMediaToMediaItem(localPost.media)}
+                    media={normalizePostMediaToMediaItem(localPost.post_media)}
                   />
                 )}
               </div>
@@ -328,24 +361,22 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
             <div className="mt-4 flex justify-between items-center">
               <PostActions />
               <div className="flex items-center gap-3">
-                <div className="flex gap-2 items-center">
+                <div
+                  className="flex gap-2 items-center"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    router.push(`/post/${localPost.id}#comments`)
+                  }}
+                >
                   <MessageCircle className="size-5" />
-                  <span>0</span>
+                  <span>{commentCount}</span>
                 </div>
 
                 <Repeat2 className="size-5" />
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    {' '}
-                    <Share className="size-5" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>
-                      Share this post by @{localPost.profiles?.username}
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <ShareMenu
+                  postId={localPost.id}
+                  username={localPost.profiles?.username || 'unknown'}
+                />
               </div>
             </div>
           </div>

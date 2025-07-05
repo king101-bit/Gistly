@@ -4,17 +4,11 @@ import Link from 'next/link'
 
 interface TrendingItemProps {
   hashtag: string
-  posts: string
-  description: string
+  posts: number
   rank: number
 }
 
-export function TrendingItem({
-  hashtag,
-  posts,
-  description,
-  rank,
-}: TrendingItemProps) {
+export function TrendingItem({ hashtag, posts, rank }: TrendingItemProps) {
   const getRankEmoji = (rank: number) => {
     if (rank <= 3) return '🔥'
     if (rank <= 6) return '📈'
@@ -33,12 +27,11 @@ export function TrendingItem({
             <span className="text-2xl">{getRankEmoji(rank)}</span>
           </div>
           <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-emerald-400 transition-colors">
-            {hashtag}
+            #{hashtag}
           </h3>
-          <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
-            {description}
+          <p className="text-sm text-zinc-500 font-semibold">
+            {posts} {posts === 1 ? 'post' : 'posts'}
           </p>
-          <p className="text-sm text-zinc-500 font-semibold">{posts} posts</p>
         </div>
         <Link href={`/topic/${encodeURIComponent(hashtag)}`}>
           <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-6 py-2 rounded-full font-bold button-press glow-effect">

@@ -24,7 +24,7 @@ export default function Home() {
           .select(
             `
             *,
-            profiles(id, display_name, username, avatar_url, location),
+            profiles:user_id(id, display_name, username, avatar_url, location),
             post_media(id, url, type, alt, thumbnail, duration)
           `,
           )

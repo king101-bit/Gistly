@@ -6,10 +6,10 @@ export interface UserProfile {
   avatar_url: string
   bio?: string
   location?: string
-  website?: string // Keep optional if not always needed
-  birth_date?: string // Keep optional if not always needed
+  website?: string
+  birth_date?: string
   verified?: boolean
-  created_at: string // Now required
+  created_at: string
   is_following?: boolean
 }
 
@@ -25,24 +25,9 @@ export interface FollowingUser {
   followed_at: string
 }
 
-export type RelationshipType = 'followers' | 'following'
-
-// You might also want these related types:
-export interface Relationship {
-  follower_id: string
-  followed_id: string
-  created_at: string
-}
-
 export interface FollowStatus {
   isFollowing: boolean
   followsYou: boolean
-}
-
-export interface RelationshipsResponse {
-  data: FollowingUser[]
-  count: number
-  hasMore: boolean
 }
 
 export interface MediaItem {
@@ -79,7 +64,7 @@ interface Post {
   repost_count: number
   updated_at: string
   profiles: UserProfile
-  media?: PostMedia[]
+  post_media?: PostMedia[]
   comment: CommentType[]
 }
 
@@ -114,12 +99,12 @@ interface CommentCardProps {
   onReply?: () => void
   showingReplyComposer?: boolean
   comment: CommentType
-  onDelete: (
+  onDelete?: (
     commentId: string,
     commentData?: Comment,
     isRollback?: boolean,
   ) => void
-  deleteComment: (commentId: string) => Promise<boolean>
+  deleteComment?: (commentId: string) => Promise<boolean>
 }
 
 type Reaction = {
@@ -135,7 +120,7 @@ export interface ReactionGroupProps {
     count: number
     reactedByMe: boolean
   }[]
-  currentUserId: string
+  currentUserId?: string
 }
 
 export interface ReactionGroup {

@@ -198,7 +198,7 @@ export default function PostDetailPage() {
           </div>
 
           {/* Comments Section*/}
-          <div className="space-y-4">
+          <div className="space-y-4" id="comments">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">
                 Comments ({comments.length})

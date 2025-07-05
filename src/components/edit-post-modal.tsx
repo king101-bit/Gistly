@@ -41,7 +41,9 @@ export function EditPostModal({
   const [content, setContent] = useState(post.content)
   const [selectedLocation, setSelectedLocation] = useState(post.location || '')
   const [showLocationPicker, setShowLocationPicker] = useState(false)
-  const [media, setMedia] = useState<PostMedia[]>(post.media || [])
+  const [post_media, setPostMedia] = useState<PostMedia[]>(
+    post.post_media || [],
+  )
   const [isRemoving, setIsRemoving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
   const maxChars = 280
@@ -68,7 +70,7 @@ export function EditPostModal({
     if (isOpen) {
       setContent(post.content)
       setSelectedLocation(post.location || '')
-      setMedia(post.media || [])
+      setPostMedia(post.post_media || [])
       setHasChanges(false)
     }
   }, [isOpen, post])
@@ -78,10 +80,10 @@ export function EditPostModal({
     const contentChanged = content !== post.content
     const locationChanged = selectedLocation !== (post.location || '')
     const mediaChanged =
-      JSON.stringify(media) !== JSON.stringify(post.media || [])
+      JSON.stringify(post_media) !== JSON.stringify(post.post_media || [])
 
     setHasChanges(contentChanged || locationChanged || mediaChanged)
-  }, [content, selectedLocation, media, post])
+  }, [content, selectedLocation, post_media, post])
 
   const handleSave = () => {
     if (content.trim()) {
@@ -89,7 +91,7 @@ export function EditPostModal({
         ...post,
         content,
         location: selectedLocation,
-        media,
+        post_media,
       })
     }
   }
@@ -97,7 +99,7 @@ export function EditPostModal({
   const handleRemoveMedia = (mediaId: string) => {
     setIsRemoving(true)
     setTimeout(() => {
-      setMedia(media.filter((item) => item.id !== mediaId))
+      setPostMedia(post_media.filter((item) => item.id !== mediaId))
       setIsRemoving(false)
     }, 300)
   }
@@ -188,18 +190,20 @@ export function EditPostModal({
               )}
 
               {/* Media Preview */}
-              {media && media.length > 0 && (
+              {post_media && post_media.length > 0 && (
                 <div className="mt-4 relative">
                   <div
                     className={`transition-opacity duration-300 ${isRemoving ? 'opacity-50' : 'opacity-100'}`}
                   >
-                    {media[0].type === 'video' ? (
+                    {post_media[0].type === 'video' ? (
                       <div className="relative">
-                        <VideoPlayer media={convertToMediaItem(media[0])} />
+                        <VideoPlayer
+                          media={convertToMediaItem(post_media[0])}
+                        />
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleRemoveMedia(media[0].id)}
+                          onClick={() => handleRemoveMedia(post_media[0].id)}
                           className="absolute top-2 right-2 size-8 p-0 rounded-full"
                         >
                           <X className="size-4" />
@@ -207,8 +211,8 @@ export function EditPostModal({
                       </div>
                     ) : (
                       <div className="relative">
-                        <MediaGrid media={media.map(convertToMediaItem)} />
-                        {media.map((item) => (
+                        <MediaGrid media={post_media.map(convertToMediaItem)} />
+                        {post_media.map((item) => (
                           <Button
                             key={item.id}
                             variant="destructive"

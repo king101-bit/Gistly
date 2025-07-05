@@ -27,6 +27,8 @@ export default function ProfilePage() {
   const [youFollow, setYouFollow] = useState(false)
   const [loadingFollowStatus, setLoadingFollowStatus] = useState(true)
   const [togglingFollow, setTogglingFollow] = useState(false)
+  const [mediaItems, setMediaItems] = useState<any[]>([])
+  const [likedPosts, setLikedPosts] = useState<Post[]>([])
 
   const supabase = createClient()
 
@@ -124,6 +126,8 @@ export default function ProfilePage() {
           .order('created_at', { ascending: false })
 
         if (postsError) throw postsError
+        const userMedia =
+          postsData?.flatMap((post) => post.post_media || []) || []
 
         const { count: followers } = await supabase
           .from('followers')
@@ -135,7 +139,51 @@ export default function ProfilePage() {
           .select('*', { count: 'exact', head: true })
           .eq('follower_id', userData.id)
 
+        const { data: reactionData, error: reactionError } = await supabase
+          .from('reactions')
+          .select('target_id')
+          .eq('user_id', userData.id)
+          .eq('emoji', '❤️')
+          .order('created_at', { ascending: false })
+
+        if (reactionError) throw reactionError
+
+        const postIds =
+          reactionData?.map((r) => r.target_id).filter(Boolean) || []
+
+        if (postIds.length === 0) {
+          setLikedPosts([])
+        } else {
+          const { data: likedPostsData, error: likedPostsError } =
+            await supabase
+              .from('posts')
+              .select(
+                `
+    *,
+    profiles:user_id (
+      id,
+      username,
+      display_name,
+      avatar_url
+    ),
+    post_media (
+      id,
+      url,
+      type,
+      alt,
+      thumbnail,
+      duration
+    )
+  `,
+              )
+              .in('id', postIds)
+
+          if (likedPostsError) throw likedPostsError
+          setLikedPosts(likedPostsData || [])
+        }
+
         setPosts(postsData || [])
+        setMediaItems(userMedia)
         setStats({ followers: followers || 0, following: following || 0 })
       } catch (err: any) {
         setError(err.message)
@@ -315,7 +363,7 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               {currentTab === 'posts' && (
-                <div className="mt-4 mb-4 gap-6">
+                <div className="mt-4 mb-4 flex flex-col gap-6">
                   {posts.length > 0 ? (
                     posts.map((post, index) => (
                       <div
@@ -331,22 +379,57 @@ export default function ProfilePage() {
                       <p className="text-muted-foreground text-lg">
                         No posts yet
                       </p>
-                      <p className="text-muted-foreground text-sm mt-2">
-                        {isCurrentUser
-                          ? "When you create posts, they'll show up here."
-                          : `@${profileUser.username} hasn't posted anything yet`}
-                      </p>
                     </div>
                   )}
                 </div>
               )}
-              {currentTab === 'media' && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground text-lg">
-                    No media available
-                  </p>
-                </div>
-              )}
+              {currentTab === 'media' &&
+                (mediaItems.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                    {mediaItems.map((media, index) => (
+                      <div
+                        key={media.id}
+                        className="slide-up"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="aspect-square relative rounded-lg overflow-hidden bg-zinc-800 cursor-pointer group">
+                          {media.type === 'video' ? (
+                            <>
+                              <img
+                                src={media.thumbnail || media.url}
+                                alt={media.alt}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                  <div className="w-0 h-0 border-l-[8px] border-l-white border-y-[6px] border-y-transparent ml-1"></div>
+                                </div>
+                              </div>
+                              {media.duration && (
+                                <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                                  {media.duration}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <img
+                              src={media.url || '/placeholder.svg'}
+                              alt={media.alt}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground text-lg">
+                      No media available
+                    </p>
+                  </div>
+                ))}
               {currentTab === 'replies' && (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground text-lg">
@@ -355,8 +438,24 @@ export default function ProfilePage() {
                 </div>
               )}
               {currentTab === 'likes' && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground text-lg">No likes yet</p>
+                <div className="mt-4 mb-4 flex flex-col gap-6">
+                  {likedPosts.length > 0 ? (
+                    likedPosts.map((post, index) => (
+                      <div
+                        key={post.id}
+                        className="slide-up"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
+                        <PostCard post={post} />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground text-lg">
+                        No reactions yet
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
