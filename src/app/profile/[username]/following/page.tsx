@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Search, UserMinus } from 'lucide-react'
 import Link from 'next/link'
-import { FollowingUser } from '../../../../../global'
+import { FollowingUser, UserProfile } from '../../../../../global'
 import { createClient } from '../../../../../utils/supabase/client'
 import { useUser } from '../../../../../context/UserContext'
 
@@ -19,51 +19,66 @@ export default function FollowingPage() {
   const currentUser = useUser()
   const supabase = createClient()
 
+  type RawFollower = {
+    created_at: string
+    profiles: {
+      id: string
+      username: string
+      display_name: string
+      avatar_url: string
+      bio?: string
+      location?: string
+      verified?: boolean
+      created_at: string
+    }
+  }
+
   useEffect(() => {
     if (!currentUser?.id) return
 
     const fetchFollowing = async () => {
       setLoading(true)
       const { data, error } = await supabase
-        .from('relationships')
+        .from('followers')
         .select(
           `
-        created_at,
-        profiles:followed_id (
-          id,
-          display_name,
-          username,
-          avatar_url,
-          bio,
-          location,
-          joined,
-          verified
-        )
-      `,
+          created_at,
+          profiles:user_id (
+            id,
+            username,
+            display_name,
+            avatar_url,
+            bio,
+            location,
+            verified,
+            created_at
+          )
+        `,
         )
         .eq('follower_id', currentUser.id)
 
       if (error) {
         console.error('Error fetching following:', error)
       } else {
-        setFollowing(
-          data.map((item) => {
-            const profile = item.profiles as any // or as a stricter inline type
+        const typedData = (data as any[]).map((item) => ({
+          created_at: item.created_at,
+          profiles: item.profiles[0] ?? item.profiles, // handles both object or array edge case
+        })) as RawFollower[]
 
-            return {
-              id: profile.id,
-              username: profile.username,
-              display_name: profile.display_name,
-              avatar_url: profile.avatar_url,
-              bio: profile.bio,
-              location: profile.location,
-              verified: profile.verified ?? false,
-              profile_created_at: profile.joined,
-              followed_at: item.created_at,
-              followsYou: false,
-            }
-          }),
-        )
+        const mapped: FollowingUser[] = typedData.map((item) => ({
+          id: item.profiles.id,
+          username: item.profiles.username,
+          display_name: item.profiles.display_name,
+          avatar_url: item.profiles.avatar_url,
+          bio: item.profiles.bio,
+          location: item.profiles.location,
+          verified: item.profiles.verified ?? false,
+          profile_created_at: item.profiles.created_at,
+          followed_at: item.created_at,
+          followsYou: false, // optional for now
+        }))
+
+        setFollowing(mapped)
       }
 
       setLoading(false)
@@ -76,10 +91,10 @@ export default function FollowingPage() {
     if (!currentUser?.id) return
 
     const { error } = await supabase
-      .from('relationships')
+      .from('followers')
       .delete()
       .eq('follower_id', currentUser.id)
-      .eq('followed_id', userId)
+      .eq('user_id', userId)
 
     if (error) {
       console.error('Unfollow error:', error)
@@ -132,7 +147,7 @@ export default function FollowingPage() {
 
           {/* Following List */}
           <div className="space-y-4">
-            {filteredFollowing.map((person, index) => (
+            {filteredFollowing.map((person) => (
               <div
                 key={person.id}
                 className="card-elevated rounded-2xl p-6 hover:shadow-2xl transition-all duration-300"

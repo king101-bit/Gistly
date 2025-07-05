@@ -30,6 +30,7 @@ import { createClient } from '../../utils/supabase/client'
 import { deletePost, PostActionsDropdown } from './PostActionsDropdown'
 import { toast } from 'sonner'
 import { EditPostModal } from './edit-post-modal'
+import UserAvatar from './UserAvatar'
 
 interface PostCardProps {
   post: Post
@@ -62,7 +63,6 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
         console.error('Failed to fetch reactions:', error)
         return
       }
-      console.log(localPost.comment)
       const grouped = Object.values(
         (data || []).reduce(
           (acc, r) => {
@@ -223,6 +223,7 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
 
       // Update local state
       setLocalPost(updatedPost)
+      console.log('PostCard received post:', post)
       setIsEditing(false)
       toast.success('Post updated successfully')
     } catch (error) {
@@ -275,24 +276,12 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
         onClick={() => !detailed && router.push(`/post/${post.id}`)}
       >
         <div className="flex gap-4">
-          <Avatar className={`${detailed ? 'size-16' : 'size-14'}`}>
-            <AvatarImage
-              src={localPost.profiles?.avatar_url || '/placeholder.svg'}
-            />
-            <AvatarFallback>
-              {(localPost.profiles?.display_name || '??')
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </AvatarFallback>
-          </Avatar>
-
+          <UserAvatar className={`${detailed ? 'size-16' : 'size-14'}`} />
           <div className="flex-1 min-w-0">
             <div className="flex justify-between">
               <div className="text-sm text-muted-foreground flex gap-2 flex-wrap">
                 <strong>{localPost.profiles?.display_name}</strong> · @
                 {localPost.profiles?.username} · {timeAgo}
-                {/* Show edited indicator if post was updated */}
                 {localPost.updated_at &&
                   localPost.updated_at !== localPost.created_at && (
                     <span className="text-xs text-zinc-500">• edited</span>

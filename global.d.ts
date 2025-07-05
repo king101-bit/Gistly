@@ -23,7 +23,6 @@ export interface FollowingUser {
   verified?: boolean
   profile_created_at: string
   followed_at: string
-  followsYou: boolean // calculate in code or fetch from separate view
 }
 
 export type RelationshipType = 'followers' | 'following'

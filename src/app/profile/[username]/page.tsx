@@ -35,15 +35,17 @@ export default function ProfilePage() {
     setTogglingFollow(true)
     try {
       if (youFollow) {
-        await supabase
-          .from('relationships')
-          .delete()
-          .match({ follower_id: currentUser.id, following_id: profileUser.id })
+        await supabase.from('followers').delete().match({
+          follower_id: currentUser.id,
+          user_id: profileUser.id,
+        })
       } else {
-        await supabase
-          .from('relationships')
-          .insert({ follower_id: currentUser.id, following_id: profileUser.id })
+        await supabase.from('followers').insert({
+          follower_id: currentUser.id,
+          user_id: profileUser.id,
+        })
       }
+
       setYouFollow(!youFollow)
     } catch (err) {
       console.error('Failed to toggle follow:', err)
@@ -64,10 +66,10 @@ export default function ProfilePage() {
       }
       try {
         const { data, error } = await supabase
-          .from('relationships')
-          .select('id')
+          .from('followers')
+          .select('user_id')
           .eq('follower_id', currentUser.id)
-          .eq('following_id', profileUser.id)
+          .eq('user_id', profileUser.id)
           .maybeSingle()
 
         if (error && error.code !== 'PGRST116')
@@ -99,18 +101,37 @@ export default function ProfilePage() {
 
         const { data: postsData, error: postsError } = await supabase
           .from('posts')
-          .select('*, post_media(id, url, type, alt, thumbnail, duration)')
+          .select(
+            `
+    *,
+    profiles:user_id (
+      id,
+      username,
+      display_name,
+      avatar_url
+    ),
+    post_media (
+      id,
+      url,
+      type,
+      alt,
+      thumbnail,
+      duration
+    )
+  `,
+          )
           .eq('user_id', userData.id)
           .order('created_at', { ascending: false })
+
         if (postsError) throw postsError
 
         const { count: followers } = await supabase
-          .from('relationships')
+          .from('followers')
           .select('*', { count: 'exact', head: true })
-          .eq('following_id', userData.id)
+          .eq('user_id', userData.id)
 
         const { count: following } = await supabase
-          .from('relationships')
+          .from('followers')
           .select('*', { count: 'exact', head: true })
           .eq('follower_id', userData.id)
 
@@ -261,7 +282,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex gap-8 mb-8 text-lg lg:text-xl">
+            <div className="flex gap-8 mb-8 mt-4 text-lg lg:text-xl">
               <Link
                 href={`/profile/${profileUser.username}/following`}
                 className="group"
