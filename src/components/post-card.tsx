@@ -47,6 +47,9 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [localPost, setLocalPost] = useState(post)
   const [timeAgo, setTimeAgo] = useState('')
+  const postOwnerId = post.user_id
+  const currentUserId = user?.id
+
   const emojiStyles: Record<string, string> = {
     '❤️': 'bg-red-500/20 text-red-500',
     '🔥': 'bg-amber-500/20 text-amber-500',
@@ -132,8 +135,21 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
             : [...prev, { emoji, count: 1, reactedByMe: true }],
         )
       }
+      if (postOwnerId !== currentUserId) {
+        await supabase.from('notifications').insert({
+          user_id: postOwnerId,
+          from_user_id: currentUserId,
+          type: 'like',
+          content: `your post: ${truncate(post.content, 100)}`,
+          post_id: post.id,
+        })
+      }
     }
   }
+  function truncate(str: string, max = 100) {
+    return str.length > max ? str.slice(0, max) + '...' : str
+  }
+
   useEffect(() => {
     async function fetchCommentCount() {
       const { count, error } = await supabase

@@ -37,9 +37,9 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" enableSystem defaultTheme="system">
           <UserProvider>
-            <div className="mobile-layout">
+            <div className="flex flex-col md:flex-row min-h-screen">
               <DesktopSidebar />
-              <main className="desktop-main">{children}</main>
+              <main className="flex-1">{children}</main>
               <Toaster />
               <DesktopRightBar />
             </div>

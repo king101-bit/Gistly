@@ -24,7 +24,7 @@ export default function AuthPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    setError('') // Clear error when user types
+    setError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

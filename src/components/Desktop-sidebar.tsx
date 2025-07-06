@@ -19,7 +19,7 @@ const DesktopSidebar = () => {
   ]
   if (!isAuthenticated) {
     return (
-      <aside className="w-full desktop-sidebar p-6">
+      <aside className="hidden lg:block w-[280px] p-6">
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="mb-8">
@@ -31,19 +31,21 @@ const DesktopSidebar = () => {
           </div>
 
           {/* Auth Prompt */}
-          <div className="card-elevated rounded-2xl p-6 mb-6">
-            <h2 className="text-xl font-bold mb-3 text-foreground">
-              Join Gistly
-            </h2>
-            <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-              Connect with Nigerians worldwide, share your gist, and stay
-              updated with trending topics 🇳🇬
-            </p>
-            <Link href="/signin">
-              <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 rounded-full font-bold button-press glow-effect">
-                Get Started
-              </Button>
-            </Link>
+          <div className="w-full px-4 sm:px-6 md:px-0">
+            <div className="w-full max-w-md mx-auto card-elevated rounded-2xl p-6 mb-6">
+              <h2 className="text-xl font-bold mb-3 text-foreground">
+                Join Gistly
+              </h2>
+              <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                Connect with Nigerians worldwide, share your gist, and stay
+                updated with trending topics 🇳🇬
+              </p>
+              <Link href="/signin">
+                <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 rounded-full font-bold button-press glow-effect">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Limited Navigation for Guests */}

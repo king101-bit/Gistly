@@ -40,7 +40,7 @@ export default function TrendingPage() {
       const sorted = Object.entries(hashtagCounts)
         .sort((a, b) => b[1] - a[1])
         .map(([hashtag, count]) => ({
-          hashtag: hashtag.replace('#', ''), // remove `#` for URL
+          hashtag: hashtag.replace('#', ''),
           posts: count,
         }))
         .slice(0, 10)

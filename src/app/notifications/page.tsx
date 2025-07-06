@@ -4,85 +4,15 @@ import FlexibleTabs from '@/components/FlexibleTabs'
 import { NotificationCard } from '@/components/NotificationCard'
 import { TopNavbar } from '@/components/TopNavbar'
 import { BottomTabBar } from '@/components/Bottom-tab-bar'
-
-const notifications = [
-  {
-    id: 1,
-    type: 'like',
-    user: {
-      name: 'Adunni Okafor',
-      username: 'adunni_o',
-      avatar:
-        'https://i.pinimg.com/736x/b2/4c/3b/b24c3bcdf3c00921c90820a412d1fda8.jpg',
-    },
-    content: 'liked your post about japa plans',
-    timestamp: '2m',
-    unread: true,
-  },
-  {
-    id: 2,
-    type: 'reply',
-    user: {
-      name: 'Kemi Adebayo',
-      username: 'kemi_codes',
-      avatar:
-        'https://i.pinimg.com/736x/6f/ed/ee/6fedee148f0ca6d45882a91d8c05f92e.jpg',
-    },
-    content: 'replied to your post: "Same here! The struggle is real 😭"',
-    timestamp: '15m',
-    unread: true,
-  },
-  {
-    id: 3,
-    type: 'follow',
-    user: {
-      name: 'Chidi Okonkwo',
-      username: 'chidi_tech',
-      avatar: '/placeholder.svg?height=48&width=48',
-    },
-    content: 'started following you',
-    timestamp: '1h',
-    unread: false,
-  },
-  {
-    id: 4,
-    type: 'mention',
-    user: {
-      name: 'Fatima Yusuf',
-      username: 'fatima_writes',
-      avatar: '/placeholder.svg?height=48&width=48',
-    },
-    content: 'mentioned you in a post about #NaijaLife',
-    timestamp: '3h',
-    unread: false,
-  },
-  {
-    id: 5,
-    type: 'repost',
-    user: {
-      name: 'Tunde Bakare',
-      username: 'tunde_b',
-      avatar: '/placeholder.svg?height=48&width=48',
-    },
-    content: 'reposted your post about Lagos traffic',
-    timestamp: '5h',
-    unread: false,
-  },
-  {
-    id: 6,
-    type: 'like',
-    user: {
-      name: 'Amaka Okafor',
-      username: 'amaka_o',
-      avatar: '/placeholder.svg?height=48&width=48',
-    },
-    content: 'liked your post about #Afrobeats',
-    timestamp: '1d',
-    unread: false,
-  },
-] as const
+import { useNotifications } from '../../../hooks/useNotification'
+import { useUser } from '../../../context/UserContext'
 
 export default function page() {
+  const user = useUser()
+  const notifications = useNotifications()
+  const mentions = notifications.filter((n) => n.type === 'mention')
+  const likes = notifications.filter((n) => n.type === 'like')
+
   const [currentTab3, setCurrentTab3] = useState('all')
   return (
     <>
@@ -93,7 +23,7 @@ export default function page() {
             <div className="mb-8">
               <FlexibleTabs
                 tabs={['All', 'Mentions', 'Likes']}
-                defaultTab="all" // ✅ This is correct
+                defaultTab="all"
                 onTabChange={setCurrentTab3}
               />
             </div>
@@ -111,8 +41,28 @@ export default function page() {
                   ))}
                 </div>
               )}
-              {currentTab3 === 'mentions' && <div>Mentions content</div>}
-              {currentTab3 === 'likes' && <div>Likes content</div>}
+
+              {currentTab3 === 'mentions' && (
+                <div>
+                  {mentions.map((notification, index) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {currentTab3 === 'likes' && (
+                <div>
+                  {likes.map((notification, index) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </main>

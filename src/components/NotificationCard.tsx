@@ -1,23 +1,9 @@
 'use client'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Heart, MessageCircle, UserPlus, AtSign, Repeat2 } from 'lucide-react'
-
-interface Notification {
-  id: number
-  type: 'like' | 'reply' | 'follow' | 'mention' | 'repost'
-  user: {
-    name: string
-    username: string
-    avatar: string
-  }
-  content: string
-  timestamp: string
-  unread: boolean
-}
-
-interface NotificationCardProps {
-  notification: Notification
-}
+import { NotificationCardProps } from '../../global'
+import { formatDistanceToNow } from 'date-fns'
 
 export function NotificationCard({ notification }: NotificationCardProps) {
   const getIcon = () => {
@@ -82,7 +68,9 @@ export function NotificationCard({ notification }: NotificationCardProps) {
             </span>
             <span className="text-zinc-600">•</span>
             <span className="text-muted-foreground">
-              {notification.timestamp}
+              {formatDistanceToNow(new Date(notification.timestamp), {
+                addSuffix: true,
+              })}
             </span>
           </div>
           <p className="text-zinc-300 leading-relaxed break-words">

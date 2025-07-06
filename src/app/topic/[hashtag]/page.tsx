@@ -105,7 +105,7 @@ export default function TopicPage() {
               </Button>
             </Link>
             <div className="flex-1">
-              <h1 className="text-xl font-bold">#{decodedHashtag}</h1>
+              <h1 className="text-xl font-bold">{decodedHashtag}</h1>
               <p className="text-sm text-muted-foreground">Trending topic</p>
             </div>
           </div>

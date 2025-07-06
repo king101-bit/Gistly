@@ -43,7 +43,7 @@ export function AuthButtons({
           <Button
             className={`w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold glow-effect ${buttonSizes[size]}`}
           >
-            Join NaijaConnect
+            Join Gistly
           </Button>
         </Link>
 

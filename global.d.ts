@@ -53,7 +53,7 @@ interface PostMedia {
 
 interface Post {
   id: number
-  user_id: string // or number depending on your schema
+  user_id: string
   content: string
   location?: string | null
   created_at: string
@@ -90,8 +90,8 @@ export interface CommentType {
 
   comment_media: MediaItem[]
 
-  replies?: CommentType[] // nested replies (threading)
-  level?: number // UI nesting level
+  replies?: CommentType[]
+  level?: number
 }
 
 interface CommentCardProps {
@@ -105,6 +105,23 @@ interface CommentCardProps {
     isRollback?: boolean,
   ) => void
   deleteComment?: (commentId: string) => Promise<boolean>
+}
+
+interface Notification {
+  id: string
+  type: 'like' | 'reply' | 'follow' | 'mention' | 'repost'
+  user: {
+    name: string
+    username: string
+    avatar: string
+  }
+  content: string
+  timestamp: string
+  unread: boolean
+}
+
+interface NotificationCardProps {
+  notification: Notification
 }
 
 type Reaction = {

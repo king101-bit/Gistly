@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { Home, Compass, Plus, Bell, User } from 'lucide-react'
+import { useUser } from '../../context/UserContext'
 
 interface BottomTabBarProps {
   activeTab: 'home' | 'discover' | 'post' | 'notifications' | 'profile'
 }
 
 export function BottomTabBar({ activeTab }: BottomTabBarProps) {
+  const user = useUser()
   const tabs = [
     { id: 'home', icon: Home, href: '/', label: 'Home' },
     { id: 'discover', icon: Compass, href: '/discover', label: 'Discover' },
@@ -16,7 +18,12 @@ export function BottomTabBar({ activeTab }: BottomTabBarProps) {
       href: '/notifications',
       label: 'Notifications',
     },
-    { id: 'profile', icon: User, href: '/profile', label: 'Profile' },
+    {
+      id: 'profile',
+      icon: User,
+      href: `/profile/${user?.username}`,
+      label: 'Profile',
+    },
   ]
 
   return (
