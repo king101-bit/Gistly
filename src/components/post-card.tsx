@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { formatDistanceToNow } from 'date-fns'
+import { differenceInSeconds, formatDistanceToNow } from 'date-fns'
 import { MessageCircle, Repeat2, Share } from 'lucide-react'
 import {
   DropdownMenu,
@@ -40,7 +40,6 @@ interface PostCardProps {
 
 export default function PostCard({ post, detailed = false }: PostCardProps) {
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
   const user = useUser()
   const supabase = createClient()
   const [commentCount, setCommentCount] = useState(0)
@@ -294,17 +293,6 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
     </div>
   )
 
-  if (!isAuthenticated) {
-    return (
-      <div className="card-elevated rounded-2xl p-6 opacity-75 pointer-events-none space-y-4">
-        <div className="text-muted-foreground">
-          Login to interact with posts
-        </div>
-        <AuthButtons action="interact with posts" />
-      </div>
-    )
-  }
-
   return (
     <>
       <div
@@ -330,7 +318,10 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
                 <strong>{localPost.profiles?.display_name}</strong> · @
                 {localPost.profiles?.username} · {timeAgo}
                 {localPost.updated_at &&
-                  localPost.updated_at !== localPost.created_at && (
+                  differenceInSeconds(
+                    new Date(localPost.updated_at),
+                    new Date(localPost.created_at),
+                  ) > 1 && (
                     <span className="text-xs text-zinc-500">• edited</span>
                   )}
               </div>

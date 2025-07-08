@@ -162,7 +162,7 @@ export default function PostDetailPage() {
             </Link>
             <div>
               <h1 className="text-xl font-bold">Post</h1>
-              <p className="text-sm text-muted-foreground">Thread</p>
+              {/* <p className="text-sm text-muted-foreground">Thread</p> */}
             </div>
             <div className="ml-auto flex gap-2">
               <Button
