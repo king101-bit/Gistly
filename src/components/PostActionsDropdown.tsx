@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '../../utils/supabase/client'
+import { toast } from 'sonner'
 
 interface PostActionsDropdownProps {
   isOwner: boolean
@@ -18,6 +19,7 @@ interface PostActionsDropdownProps {
   onReport?: () => void
   onMute?: () => void
   onBlock?: () => void
+  onContinueThread?: () => void
 }
 
 export async function deletePost(
@@ -32,7 +34,7 @@ export async function deletePost(
     console.error('Failed to delete post:', error)
     return false
   }
-
+  toast('Post deleted!')
   router.push('/')
   return true
 }

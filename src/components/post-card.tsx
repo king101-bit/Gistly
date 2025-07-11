@@ -3,21 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { differenceInSeconds, formatDistanceToNow } from 'date-fns'
-import { MessageCircle, Repeat2, Share } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { MessageCircle, Repeat2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Button } from './ui/button'
 import { VideoPlayer } from './VideoPlayer'
 import { MediaGrid } from './MediaGrid'
-import { useAuth } from '../../hooks/useAuth'
-import { AuthButtons } from './AuthButtons'
+
 import {
   CommentType,
   MediaItem,
@@ -145,6 +136,7 @@ export default function PostCard({ post, detailed = false }: PostCardProps) {
       }
     }
   }
+
   function truncate(str: string, max = 100) {
     return str.length > max ? str.slice(0, max) + '...' : str
   }

@@ -61,7 +61,7 @@ export default function TrendingPage() {
               Trending in Nigeria 🇳🇬
             </h1>
             <p className="text-muted-foreground text-lg lg:text-xl">
-              What's happening rn
+              What's happening right now
             </p>
           </div>
 
