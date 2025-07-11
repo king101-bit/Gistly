@@ -46,7 +46,7 @@ export default function AuthPage() {
       }
 
       if (result.success) {
-        router.push('/')
+        router.push('/verify-email')
       } else {
         setError(result.error || 'Something went wrong')
       }

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { Bell, Compass, Home, LogOut, Plus, Settings, User } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useUser } from '../../context/UserContext'
 import UserAvatar from './UserAvatar'
@@ -10,6 +10,12 @@ import UserAvatar from './UserAvatar'
 const DesktopSidebar = () => {
   const { isAuthenticated, signOut } = useAuth()
   const user = useUser()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const Navitems = [
     { icon: Home, label: 'Home', href: '/', active: true },
     { icon: Compass, label: 'Discover', href: '/discover' },
@@ -17,10 +23,44 @@ const DesktopSidebar = () => {
     { icon: User, label: 'Profile', href: `/profile/${user?.username || ''}` },
     { icon: Settings, label: 'Settings', href: '/settings' },
   ]
+
+  // Loading state placeholder
+  if (!mounted) {
+    return (
+      <aside className="hidden lg:block w-[280px] fixed left-0 top-0 h-screen overflow-y-auto border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex flex-col h-full p-6">
+          {/* Logo skeleton */}
+          <div className="mb-8">
+            <div className="h-8 w-24 bg-muted rounded animate-pulse" />
+          </div>
+
+          {/* Content skeleton */}
+          <div className="flex-1 space-y-4">
+            <div className="h-32 bg-muted rounded-2xl animate-pulse" />
+            <div className="space-y-2">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-12 bg-muted rounded-xl animate-pulse"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom skeleton */}
+          <div className="space-y-4">
+            <div className="h-12 bg-muted rounded-full animate-pulse" />
+            <div className="h-16 bg-muted rounded-xl animate-pulse" />
+          </div>
+        </div>
+      </aside>
+    )
+  }
+
   if (!isAuthenticated) {
     return (
-      <aside className="hidden lg:block w-[280px] p-6">
-        <div className="flex flex-col h-full">
+      <aside className="hidden lg:block w-[280px] fixed left-0 top-0 h-screen overflow-y-auto border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex flex-col h-full p-6">
           {/* Logo */}
           <div className="mb-8">
             <Link href="/">
@@ -69,15 +109,16 @@ const DesktopSidebar = () => {
       </aside>
     )
   }
+
   return (
-    <aside className="desktop-sidebar">
-      <div className="p-6 flex flex-col h-full lg:h-screen">
+    <aside className="hidden lg:block w-[280px] fixed left-0 top-0 h-screen overflow-y-auto border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="p-6 flex flex-col h-full">
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Gistly</h1>
         </div>
 
-        {/* Navigation - hide on mobile, show on desktop */}
-        <nav className="hidden lg:flex lg:flex-1 lg:flex-col lg:space-y-2">
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2">
           {Navitems.map((item) => {
             const Icon = item.icon
             return (
@@ -97,8 +138,8 @@ const DesktopSidebar = () => {
           })}
         </nav>
 
-        {/* Post button - hide on mobile (will be in bottom tab) */}
-        <div className="mb-6 hidden lg:block">
+        {/* Post button */}
+        <div className="mb-6">
           <Link href="/post">
             <Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:to-emerald-700 text-white py-4 rounded-full font-bold text-lg button-press glow-effect">
               <Plus className="size-5 mr-2" />
@@ -107,8 +148,8 @@ const DesktopSidebar = () => {
           </Link>
         </div>
 
-        {/* User profile - hide on mobile */}
-        <div className="hidden lg:flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-800/50 transition-colors cursor-pointer">
+        {/* User profile */}
+        <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-800/50 transition-colors cursor-pointer">
           <UserAvatar className="size-12 shrink-0 ring-2 ring-emerald-500/20" />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-foreground dark:text-white">

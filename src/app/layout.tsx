@@ -33,15 +33,26 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning
+        suppressHydrationWarning={true}
       >
         <ThemeProvider attribute="class" enableSystem defaultTheme="system">
           <UserProvider>
-            <div className="flex flex-col md:flex-row min-h-screen">
-              <DesktopSidebar />
-              <main className="flex-1">{children}</main>
+            <div className="flex min-h-screen">
+              <div className="hidden lg:block w-72 flex-shrink-0">
+                <DesktopSidebar />
+              </div>
+
+              <main className="flex-1 min-w-0 flex justify-center">
+                <div className="w-full max-w-4xl px-4 pb-24 lg:px-6">
+                  {children}
+                </div>
+              </main>
+
+              <div className="hidden xl:block w-80 flex-shrink-0">
+                <DesktopRightBar />
+              </div>
+
               <Toaster />
-              <DesktopRightBar />
             </div>
           </UserProvider>
         </ThemeProvider>
