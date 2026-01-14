@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createUser } from "@/lib/actions/AddUser";
@@ -124,13 +124,11 @@ export default function WaitlistForm() {
                     {state.message}
                   </div>
                 )}
-                {
-                  state?.success === false && (
-                    <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
-                      {state.message}
-                    </div>
-                  )
-                }
+                {state?.success === false && (
+                  <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
+                    {state.message}
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">
                     What's your name?
@@ -143,7 +141,7 @@ export default function WaitlistForm() {
                     className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
-                  <div>
+                <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">
                     Where did you hear about us?
                   </label>
@@ -183,5 +181,4 @@ export default function WaitlistForm() {
       </div>
     </div>
   );
-};
-
+}
