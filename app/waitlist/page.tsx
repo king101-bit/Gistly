@@ -1,8 +1,13 @@
+'use client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { createUser } from "@/lib/actions/AddUser";
+import { useActionState } from "react";
 
-const page = () => {
+export default function WaitlistForm() {
+  const [state, formAction] = useActionState(createUser, null);
   return (
-       <div className="min-h-screen bg-background text-foreground overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-background text-foreground overflow-hidden flex flex-col">
       {/* Animated background */}
       <div className="fixed inset-0 pointer-events-none opacity-20">
         <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-primary/40 rounded-full blur-3xl animate-pulse"></div>
@@ -59,7 +64,8 @@ const page = () => {
                     Connect with Nigerians
                   </h3>
                   <p className="text-muted-foreground">
-                    VFind your people, build real community, make connections that matter. Area by area, interest by interest.
+                    VFind your people, build real community, make connections
+                    that matter. Area by area, interest by interest.
                   </p>
                 </div>
               </CardContent>
@@ -77,7 +83,8 @@ const page = () => {
                     Buy & Sell Smart
                   </h3>
                   <p className="text-muted-foreground">
-                    Secure marketplace with escrow protection. No scam, no wahala. Support Nigerian businesses and creators.
+                    Secure marketplace with escrow protection. No scam, no
+                    wahala. Support Nigerian businesses and creators.
                   </p>
                 </div>
               </CardContent>
@@ -102,10 +109,79 @@ const page = () => {
               </CardContent>
             </Card>
           </div>
+          <Card className="hover:border-primary/50">
+            <CardHeader>
+              <CardTitle className="text-5xl">Be First on the Gist</CardTitle>
+              <p className="text-lg text-accent font-semibold">
+                Get early access and claim your "OG" status
+              </p>
+            </CardHeader>
+
+            <CardContent>
+              <form action={formAction} className="space-y-5">
+                {state?.success && (
+                  <div className="bg-green-100 text-green-800 p-3 rounded mb-4">
+                    {state.message}
+                  </div>
+                )}
+                {
+                  state?.success === false && (
+                    <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
+                      {state.message}
+                    </div>
+                  )
+                }
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    What's your name?
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                  <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Where did you hear about us?
+                  </label>
+                  <input
+                    type="text"
+                    name="source"
+                    required
+                    placeholder="e.g., Twitter, Friend, etc."
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Email for updates
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                <Checkbox name="notify" />
+                <label className="ml-2">Do you want to be notified?</label>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition"
+                >
+                  Join Early Access
+                </button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default page
